@@ -1,7 +1,8 @@
 <?php
-namespace MGBoateng\Cart;
+namespace Tests;
 
 use MGBoateng\Cart\Cart;
+use MGBoateng\Cart\CartItem;
 use MGBoateng\Cart\SessionStorage;
 use PHPUnit\Framework\TestCase;
 
@@ -10,7 +11,7 @@ class CartTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $this->store = new SessionStorage();
+        $this->storage = new SessionStorage(); 
     }
 
     /** @after */
@@ -20,63 +21,37 @@ class CartTest extends TestCase
             unset($_SESSION['cart']);   
         }             
     }
-
-    public function test_initialize_with_default_values_if_not_provided() 
+    
+    public function test_it_can_add_and_retrieve_cart_item_to_and_from_storage() 
     {
-        $item = ["id" => 1, "name" => "Code Happy"];
-
-        $cart = new Cart("cart", $this->store, $item, 'id');
-        $cart->save();
-        $this->assertTrue(array_key_exists("quantity", $cart->find(1))); 
-        $this->assertTrue(array_key_exists("price", $cart->find(1))); 
-        $this->assertTrue(array_key_exists("tax", $cart->find(1))); 
-        $this->assertEquals($cart->find(1)["quantity"], 1); 
-        $this->assertEquals($cart->find(1)["price"], 0);
-        $this->assertEquals($cart->find(1)["tax"], 0);  
+        $cart_item = new CartItem(["id" => 1, "name" => "Code Happy", "price" => 10, "quantity" => 1, "tax" => 20]);
+        $cart = new Cart($this->storage, $cart_item);
+        $this->assertCount(1, $this->storage->all());
     }
 
-    public function test_it_set_required_values_to_default_values_if_invalid_figures_are_provided() 
-    {
-        $item = ["id" =>1, "price" => -10, "quantity" => 0, "tax" => -1];
-        $cart = new Cart("cart", $this->store, $item, 'id');
+    public function test_it_can_edit_already_saved_item_on_cart() 
+    {        
+        $cart_item = new CartItem(["id" => 1, "name" => "Code Happy", "price" => 10, "quantity" => 1, "tax" => 20]);
+        $cart = new Cart($this->storage, $cart_item);
 
-        $this->assertEquals($cart->find(1)["quantity"], 1); 
-        $this->assertEquals($cart->find(1)["price"], 0);
-        $this->assertEquals($cart->find(1)["tax"], 0);  
+        $cart = new CartItem(["id" => 1, "price" => 20]);
+
+        $this->assertCount(1, $this->storage->all());
+
+    } 
+
+    public function test_it_can_calculate_to_total_cost() 
+    {
+        $cart_item1 = new CartItem(["id" => 1, "name" => "Code Happy", "price" => 10, "quantity" => 1, "tax" => 20]);
+        $cart1 = new Cart($this->storage, $cart_item1);
+
+        $cart_item2 = new CartItem(["id" => 2, "name" => "Happy People", "price" => 5, "quantity" => 2, "tax" => 5]);
+        $cart2 = new Cart($this->storage, $cart_item2);
+
+        $this->assertCount(2, $this->storage->all());
+        $this->assertEquals($cart2->total(), 22.5);
     }
 
-    public function test_it_can_add_an_item_to_the_cart_items() 
-    {
-        $item = ["id" => 1, "name" => "Code Happy"];
-        $cart = new Cart("cart", $this->store, $item, 'id');
-        $cart->save();
-        $cart->put(["id" => 2, "name" => "Code Challange", "quantity" => 2]);
-        $this->assertCount(2, $this->store->get("cart"));
-    }
 
-    public function test_can_update_existing_item() 
-    {
-        $item = ["id" => 1, "name" => "Code Happy"];
-        $cart = new Cart("cart", $this->store, $item, 'id');
-        $cart->put(["id" => 1, "name" => "Code Better"]);
-        $this->assertSame($cart->find(1)["name"], "Code Better");
-    }
 
-    public function test_item_can_be_removed_from_cart_list() 
-    {
-        $item = ["id" => 1, "name" => "Code Happy"];
-        $cart = new Cart("cart", $this->store, $item, 'id');
-        $cart->save();
-        $cart->remove(1);
-        $this->assertCount(0, $cart->all());
-    }
-
-    public function test_it_can_drop_the_cart_from_storage() 
-    {
-        $item = ["id" => 1, "name" => "Code Happy"];
-        $cart = new Cart("cart", $this->store, $item, 'id');
-        $cart->save();
-        $cart->drop();
-        $this->assertFalse($this->store->has("cart"));
-    }
 }

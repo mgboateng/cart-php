@@ -22,28 +22,23 @@ class SessionStorageTest extends TestCase
         }               
     }
 
-    public function test_it_can_date_can_be_retrived_from_session_with_key() 
+    public function test_data_can_be_retrived_from_session_with_key() 
     {
-        $_SESSION['cart'] = $this->item;
-        $this->assertEquals($this->storage->get('cart'), $this->item);
-    }
-
-    public function test_it_can_determine_if_session_exists() 
-    {
-        $_SESSION['cart'] = $this->item;
-        $this->assertTrue($this->storage->has('cart'));   
+        $this->storage->save($this->item);
+        $this->assertEquals($this->storage->get(0), $this->item);
     }
 
     public function test_it_can_add_data_to_session() 
     {
-        $this->storage->put('cart', $this->item);
-        $this->assertSame($_SESSION['cart'], $this->item);
+        $this->storage->put($this->item, 1);
+
+        $this->assertSame($_SESSION['cart'][1], $this->item);
     }
 
     public function test_it_can_delete_item_from_session() 
     {
-        $_SESSION['cart'] = $this->item;
-        $this->storage->forget('cart');
-        $this->assertFalse($this->storage->has('cart'));
+        $this->storage->put($this->item, 1);
+        $this->storage->forget(1);
+        $this->assertCount(0, $this->storage->all());
     }
 }                       

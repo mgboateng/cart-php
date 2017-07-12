@@ -1,14 +1,14 @@
 <?php
 namespace MGBoateng\Cart;
 
+use MGBoateng\Cart\CartItem;
 use MGBoateng\Cart\IStorage;
 
 class Cart
 {
-    protected $items = [];
+    protected $items;
     protected $store;
-    protected $key;
-    protected $store_id;
+    protected $primary_key = "id";
     
     /**
      * @param string  $store_key   [description]
@@ -16,32 +16,17 @@ class Cart
      * @param array    $item        [description]
      * @param string   $primary_key [primary key for name of the items]
      */
-    public function __construct($store_key, IStorage $store, array $item = [], $primary_key = "id")
+    public function __construct(IStorage $storage, CartItem $item)
     {
-        $this->store = $store;
-        $this->key = $primary_key;
-        $this->store_id = $this->get($store_key) ?? $store_key;
+        $this->store = $storage;
+        $this->items = $this->store->all();
         $this->put($item);
     }
 
-    /**
-     * Initialize and set default values for cart
-     * @param  array  $list arrary to add to cart
-     * @return array      
-     */
-    protected function initialize(array $list)
-    {
-        $quantity = isset($list["quantity"]) ? intval($list["quantity"]) : intval(1);
-        $list["quantity"] = $quantity < 1 ? 1 : $quantity;
-
-        $price = isset($list["price"]) ? floatval($list["price"]) : floatval(0);
-        $list["price"] = $price < 0 ? 0 : $price;
-
-        $tax = isset($list["tax"]) ? floatval($list["tax"]) : floatval(0);
-        $list["tax"] = $tax < 0 ? 0 : $tax;
-
-        return $list;
-    }
+   public function getKey() 
+   {
+       return $this->primary_key;
+   }
 
    /**
     * Get all items from a cart
@@ -57,14 +42,20 @@ class Cart
      * @param  mix $key [description]
      * @return array      [description]
      */
-    public function find($key)
+    public function exist($id)
     {
+        $key = $this->getKey();
+             
+        if (empty($this->items)) return false;
+
         foreach ($this->items as $item) {
-            if ($item[$this->key] == $key) {
-                return $item;
+            foreach ($item as $index => $value) {
+                if ($value->{$key} == $id) {
+                return true;
+            }
             }
         }
-        return null;
+        return false;
     }
 
     /**
@@ -72,22 +63,38 @@ class Cart
      * @param  array $list [description]
      * @return void       [description]
      */
-    public function put($list)
-    {
-        if (! array_key_exists($this->key, $list)) throw new Exception("Item must contain an {$this->key} key");
-
-        $exist = $this->find($list[$this->key]);
+    public function put(CartItem $input)
+    {      
+        $exist = $this->exist($input->{$this->getKey()});
+        //die(var_dump($exist));
         if ($exist) {
-            foreach ($this->items as $key => $item) {
-                if ($item[$this->key] == $list[$this->key]) {
-                    $this->items[$key] = array_merge($this->items[$key], $this->initialize($list));                   
+            var_dump("On Update");
+            foreach ($this->items as $index => $item) {
+                if ($item{$this->getKey()} == $input->{$this->getKey()}) {
+                    foreach ($input as $key => $value) {
+                        $this->items[$index][$key] =$value;
+                        $this->update($value, $index);
+                    }                
+                };
+            }
+        } else {            
+            $this->items[] = $input;
+            $this->save($input);           
+        }       
+
+       
+    }
+
+    public function findById($id) 
+    {
+        $exist = $this->exist($item);
+        if ($exist) {
+            foreach ($this->items as $index => $item) {
+                if ($item{$this->getKey()} == $id) {
+                    return $index;                       
                 };
             }
         }
-        
-        array_push($this->items, $this->initialize($list));
-
-        $this->save();
     }
 
     /**
@@ -95,26 +102,13 @@ class Cart
      * @param  mix $key [description]
      * @return void      [description]
      */
-    public function remove($key)
+    public function remove(CartItem $input)
     {
-        $exist = $this->find($key);
-
-        if ($exist) {
-            foreach ($this->items as $index => $item) {
-                if ($item[$this->key] == $key) {
-                    unset($this->items[$index]);                  
+        foreach ($this->items as $index => $item) {
+                if ($item{$this->getKey()} == $input->{$this->getKey()}) {
+                    unset($this->items[$index]);                                       
                 };
             }
-        }
-    }
-
-    /**
-     * Retrive date from storage
-     * @return array
-     */
-    public function get($store_key) 
-    {
-        return $this->store->get($store_key);
     }
 
     /**
@@ -123,26 +117,32 @@ class Cart
      */
     public function drop()
     {
-        $this->store->forget($this->store_id);
+        $this->store->forget();
     }
 
     /**
      * Save cart to storage
      * @return void
      */
-    public function save()
+    
+    public function save($item)
     {
-        $this->store->put($this->store_id, $this->toArray());
+        $this->store->save($item);
     }
 
-    /**
-     * Cast Cart to Array
-     * @return array
-     */
-    public function toArray() 
+    public function update($item, $index)
     {
-        return $this->items;
+        $this->store->put($this->item, $index);
     }
 
+    public function total() 
+    {
+
+        $sum = 0;
+        foreach ($this->items as $item) {
+            $sum += $item->total();
+        }
+        return $sum;
+    }
 
 }

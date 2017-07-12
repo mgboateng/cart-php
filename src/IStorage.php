@@ -10,19 +10,18 @@ interface IStorage
      */
     public function get($key);
 
+     /**
+     * @return array      [Returns all item in storage
+     */
+    public function all();
+
     /**
      * Check storage if it has input with the specifed key and not null
      * It will return true if key exist and is nut null
      * @param  string  $key
      * @return boolean
      */
-    public function has($key);
 
-    /**
-     * delete item from storage
-     * @param  string $key
-     * @return void
-     */
     public function forget($key);
 
     /**
@@ -31,5 +30,7 @@ interface IStorage
      * @param  array $value
      * @return void
      */
-    public function put($key, $value);
+    public function save($value);
+
+    public function put($value, $key);
 }
