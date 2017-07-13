@@ -15,13 +15,8 @@ class CartItemTest extends TestCase
     {
         $item = ["id" => 1, "name" => "Code Happy"];
         $cart_item = new CartItem($item);
-      
-        $this->assertTrue(array_key_exists("quantity", $cart_item->toArray())); 
-        $this->assertTrue(array_key_exists("price", $cart_item->toArray())); 
-        $this->assertTrue(array_key_exists("tax", $cart_item->toArray())); 
         $this->assertEquals($cart_item->quantity, 1); 
         $this->assertEquals($cart_item->price, 0);
-        $this->assertEquals($cart_item->tax, 0);  
     }
 
     public function test_it_can_be_updated_after_being_initialised() 
@@ -39,31 +34,27 @@ class CartItemTest extends TestCase
         $cart_item = new CartItem(["id" => 1, "name" => "Code Happy", "quantity" => 0, "tax" => -1, "price" => -1]);
         $this->assertEquals($cart_item->quantity, 1);
         $this->assertEquals($cart_item->price, 0);
-        $this->assertEquals($cart_item->tax, 0);
     }
 
     public function test_it_can_be_updated() 
     {
         $cart_item = new CartItem([]);
-        $cart_item->put(["quantity" => 10, "tax" => 5, "price" => 10]);
+        $cart_item->put(["quantity" => 10, "price" => 10]);
         $this->assertEquals($cart_item->quantity, 10);
         $this->assertEquals($cart_item->price, 10);
-        $this->assertEquals($cart_item->tax, 5);
     }
 
     public function test_it_can_check_against_invalide_input_for_required_fields_when_updating_the_fileds() 
     {
         $cart_item = new CartItem(["id" => 1, "name" => "Code Happy", "quantity" => 0, "tax" => 5, "price" => 10]);
-        $cart_item->put(["quanttity" => 0, "tax" => -5, "price" => -10]);
+        $cart_item->put(["quanttity" => 0, "price" => -10]);
         $this->assertEquals($cart_item->quantity, 1);
         $this->assertEquals($cart_item->price, 0);
-        $this->assertEquals($cart_item->tax, 0);
     }
 
     public function test_it_can_calculate_to_price_and_total_of_any_item() 
     {
-        $cart_item = new CartItem(["id" => 1, "name" => "Code Happy", "quantity" => 5, "tax" => 5, "price" => 10]);
-        $this->assertEquals($cart_item->price(), 10.5);
-        $this->assertEquals($cart_item->total(), 52.5);
+        $cart_item = new CartItem(["id" => 1, "name" => "Code Happy", "quantity" => 5, "price" => 10]);
+        $this->assertEquals($cart_item->total(), 50);
     }
 }

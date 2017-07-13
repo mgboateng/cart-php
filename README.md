@@ -21,65 +21,43 @@ To use the package use the Cart, CartItem and SessionStorage class as below:
 ```php
 <?php
 
-use MGBoateng\Cart\Cart;
-use MGBoateng\Cart\CartItem;
-use MGBoateng\Cart\SessionStorage;
+    use MGBoateng\Cart\Cart;
+    use MGBoateng\Cart\CartItem;
+    use MGBoateng\Cart\SessionStorage;
+
 ```
-To add an item to the cart, instanciate a new CartItem. The CartItem take an associate array as it's sole argument.
-The array should be the product you want to pass to the cart. The array must have an id, price and quantity keys set else
-they will be set for you automatically with default values;
+To start using the cart class first initialize the a SessionStorage which take a string parameter as the name for the session
+Then initialize the Cart and pass in the session. To add to the cart log pass a CartItem to the addItem of the Cart instance.
 
 ```php
-$item = ["id" => 1, "name" => "Happy People", "price" => 10, "quantity" => 1, "tax" => 20];
-$cart_item = new CartItem($item)
+    $cart = new Cart(new SessionStorage("cart"));
+
+    $item = new CartItem(["id" => 1, "name" => "Code Happy", "price" => 10, "quantity" => 1]);
+
+    $cart->addItem($item); // to add to cart
 ```
 or
 ```php
-$cart_item = new CartItem();
-$cart_item->id = 1;
-$cart_item->name = "Happy People";
-cart_item->tax = 5.0;
-    ....
-```
-Any amount of key/value could be add as required by the application.
-To obtain the price of an item including the vat call the price method on the item `$cart_item->price()`; and the total
-for any cart item could to obtained by `$cart_item->total()`;
+    $cart_item = new CartItem();
+    $cart_item->id = 1;
+    $cart_item->name = "Happy People";
+    $cart_item->price = 10;
+    $cart_item->quantity = 1;
 
+    $cart->addItem($cart_item);
+
+```
+Other methods that can called on the Cart instance are
 ```php
-$cart_item = new CartItem(["id" => 1, "name" => "Code Happy", "quantity" => 5, "tax" => 5, "price" => 10]);
-$cart_item->price();    // 10.5;
-$cart_item->total();    // 52.5;
-```
-The key for the production array could be set or retrieved calling the key on the CartItem object eg `$cart_item->category = "Shoes"`
-or `$id = $cart_item->id`. Once the the CartItem has been set it should be passed to the Cart together with the storage for
-the data to be persisted.
+    $cart->updateItem($cartItem, $id); // to update an exit item with the specified id
 
-```php
-use MGBoateng\Cart\Cart;
-use MGBoateng\Cart\CartItem;
-use MGBoateng\Cart\SessionStorage;
+    $cart->getAll() // returns an array of all CartItem added to cart
 
-$item = ["id" => 1, "name" => "Happy People", "price" => 10, "quantity" => 1, "tax" => 20];
+    $cart->deleteItem($id) delete a CartItem from the cart log
 
-$cart_item = new CartItem($item)
-$storage = new SessionStorage();
-
-new Cart($storage, $cart_item);
+    $cart->drop() // Delete all CartItem from cart log
 
 ```
-To edit and item which has been added to the cart, new up a CartItem with and array of the production you want to edit in the cat.  Create a new cart with the cart item and it will retrieve an instance of the save item with the field updated with the provided ones.
-
-```php
-$item = ["id" => 1, "name" => "Happy People", "price" => 10, "quantity" => 50, "tax" => 20];
-
-$cart_item = new CartItem($item);
-
-$cart =  new Cart($storage, $cart_item);
-
-```
-This will edit the previous example with the updated values.
-
-All stored items session could be retrieved from storage by calling `$storage->all()`.
 
 ## License
 This software is distributed under the [MIT license.](LICENSE)

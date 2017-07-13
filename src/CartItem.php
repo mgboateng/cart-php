@@ -24,9 +24,6 @@ class CartItem
         $price = isset($list["price"]) ? floatval($list["price"]) : floatval(0);
         $list["price"] = $price < 0 ? 0 : $price;
 
-        $tax = isset($list["tax"]) ? floatval($list["tax"]) : floatval(0);
-        $list["tax"] = $tax < 0 ? 0 : $tax;
-
         return $list;
     }
 
@@ -36,16 +33,11 @@ class CartItem
 
             switch ($key) {
                 case 'quantity':
-                    var_dump($value);
                     $this->item['quantity'] = intval($value) < 1 ? 1 : intval($value);
                     break;
 
                 case 'price':
                     $this->item['price'] = floatval($value) < 0 ? 0.0 : floatval($value);
-                    break;
-
-                case 'tax':
-                    $this->item['tax'] = floatval($value) < 0 ? 0.0 : floatval($value);
                     break;
                 
                 default:
@@ -75,18 +67,8 @@ class CartItem
         unset($this->item[$key]);
     }
 
-    public function toArray() 
-    {
-        return $this->item;
-    }
-
-    public function price() 
-    {
-        return (1 + $this->tax / 100) * $this->price;
-    }
-
     public function total() 
     {
-        return $this->quantity * $this->price();
-    }    
+        return $this->quantity * $this->price;
+    }
 }
