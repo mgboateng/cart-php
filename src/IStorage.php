@@ -4,33 +4,22 @@ namespace MGBoateng\Cart;
 interface IStorage
 {
     /**
-     * [get description]
-     * @param  string $key [Retrive the date with the given key]
-     * @return array      [Returns the items in storage with the given key]
+     * Get all Items from session
+     * @return array      
      */
-    public function get($key);
-
-     /**
-     * @return array      [Returns all item in storage
-     */
-    public function all();
+    public function get();
 
     /**
-     * Check storage if it has input with the specifed key and not null
-     * It will return true if key exist and is nut null
-     * @param  string  $key
-     * @return boolean
-     */
-
-    public function forget($key);
-
-    /**
-     * persist data is the specified key and value
-     * @param  string $key
-     * @param  array $value
+     * Drop the session 
      * @return void
      */
-    public function save($value);
+    public function drop();
 
-    public function put($value, $key);
+
+    /**
+     * Store date to session
+     * @param  array $value [description]
+     * @return void
+     */
+    public function put($value);
 }

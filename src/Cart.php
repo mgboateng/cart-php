@@ -6,143 +6,66 @@ use MGBoateng\Cart\IStorage;
 
 class Cart
 {
-    protected $items;
-    protected $store;
-    protected $primary_key = "id";
-    
+
+    protected $storage;
+
     /**
      * @param string  $store_key   [description]
      * @param IStorage $store       [description]
      * @param array    $item        [description]
      * @param string   $primary_key [primary key for name of the items]
      */
-    public function __construct(IStorage $storage, CartItem $item)
+    public function __construct(IStorage $storage)
     {
-        $this->store = $storage;
-        $this->items = $this->store->all();
-        $this->put($item);
+        $this->storage = $storage;
     }
 
-   public function getKey() 
-   {
-       return $this->primary_key;
-   }
-
-   /**
-    * Get all items from a cart
-    * @return array [description]
-    */
-    public function all()
+    public function getItem($id) 
     {
-        return $this->items;
-    }
-
-    /**
-     * find item from cart by primary key
-     * @param  mix $key [description]
-     * @return array      [description]
-     */
-    public function exist($id)
-    {
-        $key = $this->getKey();
-             
-        if (empty($this->items)) return false;
-
-        foreach ($this->items as $item) {
-            foreach ($item as $index => $value) {
-                if ($value->{$key} == $id) {
-                return true;
-            }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Add to cart if already exist or update if new
-     * @param  array $list [description]
-     * @return void       [description]
-     */
-    public function put(CartItem $input)
-    {      
-        $exist = $this->exist($input->{$this->getKey()});
-        //die(var_dump($exist));
-        if ($exist) {
-            var_dump("On Update");
-            foreach ($this->items as $index => $item) {
-                if ($item{$this->getKey()} == $input->{$this->getKey()}) {
-                    foreach ($input as $key => $value) {
-                        $this->items[$index][$key] =$value;
-                        $this->update($value, $index);
-                    }                
-                };
-            }
-        } else {            
-            $this->items[] = $input;
-            $this->save($input);           
-        }       
-
-       
-    }
-
-    public function findById($id) 
-    {
-        $exist = $this->exist($item);
-        if ($exist) {
-            foreach ($this->items as $index => $item) {
-                if ($item{$this->getKey()} == $id) {
-                    return $index;                       
-                };
+        $items = $this->getAll();
+        foreach ($items as $key => $item) {
+            if ($item->id == $id) {
+                return $item;
             }
         }
     }
 
-    /**
-     * Remove item from cart
-     * @param  mix $key [description]
-     * @return void      [description]
-     */
-    public function remove(CartItem $input)
+    public function getAll() 
     {
-        foreach ($this->items as $index => $item) {
-                if ($item{$this->getKey()} == $input->{$this->getKey()}) {
-                    unset($this->items[$index]);                                       
-                };
+        return $this->storage->get();
+    }
+
+    public function addItem(CartItem $item) 
+    {
+        $items = $this->getAll();
+        array_push($items, $item);
+        $this->storage->put($items);
+    }
+
+    public function updateItem($item, $id) 
+    {
+        $items = $this->getAll();
+        foreach ($items as $index => $value) {
+            if ($value->id == $id) {
+                $items[$index] = $item;
             }
-    }
-
-    /**
-     * Delete cart from storage
-     * @return void
-     */
-    public function drop()
-    {
-        $this->store->forget();
-    }
-
-    /**
-     * Save cart to storage
-     * @return void
-     */
-    
-    public function save($item)
-    {
-        $this->store->save($item);
-    }
-
-    public function update($item, $index)
-    {
-        $this->store->put($this->item, $index);
-    }
-
-    public function total() 
-    {
-
-        $sum = 0;
-        foreach ($this->items as $item) {
-            $sum += $item->total();
         }
-        return $sum;
+        $this->storage->put($items);
     }
 
+    public function deleteItem($id) 
+    {
+        $items = $this->getAll();
+        foreach ($items as $index => $value) {
+            if ($item->id == $id) {
+                unset($items[$index]);
+            }
+        }
+        $this->storage->put($items);
+    }
+
+    public function drop() 
+    {
+        $this->storage->drop();
+    }
 }

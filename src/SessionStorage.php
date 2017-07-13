@@ -5,49 +5,44 @@ use MGBoateng\Cart\IStorage;
 
 class SessionStorage implements IStorage
 {
-    /**
-     * [get description]
-     * @param  string $key [Retrive the date with the given key]
-     * @return array      [Returns the items in storage with the given key]
-     */
-    public function get($key)
+    protected $name;
+
+    public function __construct($name)
     {
-        return $_SESSION["cart"][$key] ?? null;
+        $this->name = $name;
+        if (empty($_SESSION[$name])) {
+            $_SESSION[$name]["items"] = serialize([]);
+        }
     }
 
     /**
-     * 
-     * @return array      [Returns all item in storage
+     * Get all Items from session
+     * @return array      
      */
-    public function all()
+    public function get()
     {
-        return $_SESSION["cart"] ?? [];
+        $items = $_SESSION[$this->name]["items"];
+        return unserialize($items);
     }
 
     /**
-     * Check storage if it has input with the specifed key and not null
-     * It will return true if key exist and is nut null
-     * @param  string  $key
-     * @return boolean
-     */
-    public function forget($key)
-    {
-        unset($_SESSION["cart"][$key]);
-    }
-
-    /**
-     * persist data is the specified key and value
-     * @param  string $key
-     * @param  array $value
+     * Drop the session 
      * @return void
      */
-    public function save($value)
+    public function drop()
     {
-        $_SESSION["cart"][] = $value;
+        unset($_SESSION[$this->name]);
+        $_SESSION[$this->name]["items"] = serialize([]);
     }
 
-    public function put($value, $key)
+    /**
+     * Store date to session
+     * @param  array $value [description]
+     * @return void
+     */
+    public function put($value)
     {
-        $_SESSION["cart"][$key] = $value;
+        $items = serialize($value);
+        $_SESSION[$this->name]["items"] = $items;
     }
 }
