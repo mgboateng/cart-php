@@ -58,6 +58,17 @@ Other methods that can called on the Cart instance are
     $cart->drop() // Delete all CartItem from cart log
 
 ```
+To total cost of each CartItem to gone return by calling the total methed to it `cart_item->total(). for instance
+```php
+    $cart = new Cart(new SessionStorage("cart"));
+    $items = $cart->getAll();
+
+    $total = 0;
+    foreach($items as $item) {
+        $total += $item->total();
+    }
+    $grand_total = $total; // the grand total of all CartItems in the cart log
+```
 
 ## License
 This software is distributed under the [MIT license.](LICENSE)
