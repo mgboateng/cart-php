@@ -1,12 +1,12 @@
 <h1 style="text-align: center">Shopping Cart Package</h1>
 
-This package makes it easier to add and manage a shopping cart in your application. By default it provides storage into session
- but the IStorage could be implemented to provide alternative source to store session.
+This package makes it easier to add and manage a shopping cart in your application. By default it provides storage 
+into session but the IStorage could be implemented to provide alternative source to store session.
 
 ## Installation
 You can install the package through composer `composer require mgboateng/cart-php` or
 through your composer json file:
-```json
+```php
 {
     "require": {
         "mgboateng/cart-php" : "dev-master"          
